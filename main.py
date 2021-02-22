@@ -72,9 +72,6 @@ class Parser():
 		for line in file:
 			clean = line.replace("\n","")
 			login.append(clean)
-
-		print(login)
-
 		return login #user,pass
 
 	def readContactList(self):
@@ -89,11 +86,9 @@ class Parser():
 			else:
 				clean = clean.replace("\t","")
 				contacts[category] = clean.split(',')
-		#print(contacts)
 		return contacts
 
 	def update(self, newData):
-
 		announcement = Announcement()
 		for site in newData:
 			if self.first_parse == True:
@@ -372,19 +367,3 @@ if __name__ == "__main__":
 		main(args);
 	else:
 		main([]);
-
-
-
-
-
-
-'''image1 = ImageGrab.grab(bbox=(1072,364,1412,404))
-name = "test.png"
-image1.save(name)
-text = bot.parseImageText(name)
-print(text)
-print([text])'''
-'''for y in range(0, im.size[1], 5):
-	for x in range(0, im.size[0], 10): #
-		color = im.getpixel((x, y))
-		print(x,y,color)'''
