@@ -89,15 +89,11 @@ class Parser():
 			for contact in self.contact_list[provider]:
 				sms_gateway = contact + self.service_emails[provider]
 				print("target = ",sms_gateway)
-
 				msg = MIMEMultipart()
 				msg['From'] = self.email
 				msg['To'] = sms_gateway
-
 				msg['Subject'] = " "
-
 				body = announcement.getMessage()#
-
 				msg.attach(MIMEText(body, 'plain'))
 				sms = msg.as_string()
 				server.sendmail(self.email,sms_gateway,sms)
@@ -106,8 +102,16 @@ class Parser():
 
 	def parse(self): # returns actions required (boolean)
 		actions_required = []
-		parses = ([self.mode] if self.mode != "all_vendors" else [v for v in self.URLS if v != "generic"])
-		for p in parses:
+		#things_to_parse = ([self.mode] if self.mode != "all_vendors" else [v for v in self.URLS if v != "generic"])
+		things_to_parse = []
+		if self.mode != "all_vendors"
+			things_to_parse.append(self.mode)
+		else:
+			for v in self.URLS:
+				if v != "generic":
+					things_to_parse.append(v)
+
+		for p in things_to_parse:
 			action = eval(f'self.parse_{p}')
 			if action == True:
 				actions_required.append(p)
