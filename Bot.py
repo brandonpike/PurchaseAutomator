@@ -73,14 +73,14 @@ class Bot():
 		pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
 		text = pytesseract.image_to_string(name).replace("\n\x0c","")
 		print(text)
-		#os.remove(name)
+		os.remove(name)
 		return text
 
 	def getPositionOfTarget(self, target): # Target is color of add to cart button
 		targ_color = self.target_colors[target]
 		image = ImageGrab.grab()
 		targs = []
-		image.save('tmp/getPositionOfTarget.png')
+		#image.save('tmp/getPositionOfTarget.png')
 		for y in range(0, 1080, 5):
 			for x in range(0, 1920, 10): #
 				color = image.getpixel((x, y))
