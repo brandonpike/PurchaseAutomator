@@ -3,10 +3,10 @@ from bs4 import BeautifulSoup
 import smtplib 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from Util import Announcement, Stock
+from Util import Announcement, Stock, VendorHub
 
 class Parser():
-	def __init__(self, mode=None):
+	def __init__(self, vh, mode=None):
 		self.mode = mode
 		self.data = {}
 		self.email,self.password = self.readLogin()
@@ -17,12 +17,8 @@ class Parser():
 							   "verizon":"@vtext.com"
 							   }
 		self.headers = {'User-Agent': 'Mozilla/5.0'}
-		self.URLS = {
-					"generic":"https://www.nowinstock.net/videogaming/consoles/sonyps5/",
-					"bestbuy":"https://www.bestbuy.com/site/whirlpool-24-6-cu-ft-side-by-side-refrigerator-stainless-steel/5991300.p?skuId=5991300",#"https://www.bestbuy.com/site/sony-playstation-5-digital-edition-console/6430161.p?skuId=6430161"
-					"psdirect":"https://direct.playstation.com/en-us/consoles/console/playstation5-digital-edition-console.3005817"
-					}
 		self.first_parse = True
+		self.VH = vh
 
 	def readLogin(self):
 		login = []
@@ -102,28 +98,20 @@ class Parser():
 
 	def parse(self): # returns actions required (boolean)
 		actions_required = []
-		#things_to_parse = ([self.mode] if self.mode != "all_vendors" else [v for v in self.URLS if v != "generic"])
-		things_to_parse = []
-		if self.mode != "all_vendors"
-			things_to_parse.append(self.mode)
-		else:
-			for v in self.URLS:
-				if v != "generic":
-					things_to_parse.append(v)
-
-		for p in things_to_parse:
-			action = eval(f'self.parse_{p}')
+		things_to_parse = ([self.mode] if self.mode != "all_vendors" else [v for v in self.VH.URLS if v != "generic"])
+		for t in things_to_parse:
+			action = eval(f'self.parse_{t}')() # type(action) = str -> mode ("bestbuy", "psdirect", etc...)
 			if action == True:
-				actions_required.append(p)
-			elif p == "generic":
+				actions_required.append(t)
+			elif t == "generic":
 				self.update(action)
 		return actions_required
 
 	def parse_generic(self):
 		newData = {}
-		for site in self.URLS:
+		for site in self.VH.URLS:
 			stocks = [] 
-			page = requests.get(self.URLS[site])
+			page = requests.get(self.VH.URLS[site])
 			soup = BeautifulSoup(page.content, "html.parser")
 			data_container = soup.find(id="data")
 			table = data_container.table
@@ -149,7 +137,7 @@ class Parser():
 		return newData
 
 	def parse_bestbuy(self):
-		url = self.URLS["bestbuy"]
+		url = self.VH.URLS["bestbuy"]
 		page = requests.get(url, headers=self.headers)
 		soup = BeautifulSoup(page.text, 'html.parser')
 		button = soup.find(class_='fulfillment-add-to-cart-button')
@@ -158,4 +146,7 @@ class Parser():
 
 	def parse_psdirect(self):
 		btext = "Out of Stock"
-		return (False if btext == "Out of Stock" else True)
+		url = self.VH.URLS["psdirect"]
+		page = requests.get(url, headers=self.headers)
+		soup = BeautifulSoup(page.text, 'html.parser')
+		return False#(False if btext != "Out of Stock" else True)

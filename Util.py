@@ -33,3 +33,11 @@ class Stock():
 			self.updated = value
 	def __str__(self):
 		return f'{self.name} | {self.status} | {self.price} | {self.updated}'
+
+class VendorHub():
+	def __init__(self):
+		self.URLS = {
+					"generic":"https://www.nowinstock.net/videogaming/consoles/sonyps5/",
+					"bestbuy":"https://www.bestbuy.com/site/whirlpool-24-6-cu-ft-side-by-side-refrigerator-stainless-steel/5991300.p?skuId=5991300",#"https://www.bestbuy.com/site/sony-playstation-5-digital-edition-console/6430161.p?skuId=6430161",
+					"psdirect":"https://direct.playstation.com/en-us/consoles/console/playstation5-digital-edition-console.3005817"
+					}

@@ -2,6 +2,7 @@ import os,sys
 import time
 from Parser import Parser
 from Bot import Bot
+from Util import VendorHub
 
 def main(args):
 	time.sleep(2) # Give user a moment to tab into site
@@ -18,17 +19,18 @@ def main(args):
 		print(f'Error, {mode} is not a valid mode.')
 		return
 
-	parser = Parser(mode)
-	return
-	bot = Bot()
+	vendorhub = VendorHub()
+	parser = Parser(vendorhub, mode)
+	bot = Bot(vendorhub)
 
 	flag = True
 	while flag:
 		actions_required = parser.parse()
+		print(f'Actions required -> {actions_required}')
 
 		for action in actions_required:
-			bot.openSite(action)
-			bot.run(mode)
+			result = bot.run(action)
+			print(result)
 
 		time.sleep(30) # Ping sites every 30 seconds
 
