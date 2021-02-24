@@ -13,9 +13,8 @@ class Bot():
 		self.VH = vh
 
 	def openSite(self, action_to_take):
-		site = self.VH.URLS[action_to_take]
 		chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
-		webbrowser.get(chrome_path).open(site)
+		webbrowser.get(chrome_path).open(action_to_take)
 
 	def doAction(self, action, params): # scroll param = [int], click params = [(x,y),target]
 		if action == "scroll":
@@ -58,7 +57,6 @@ class Bot():
 			image1 = ImageGrab.grab(bbox=None)
 			if not os.path.isdir('screens'):
 				os.mkdir('screens')
-		print(f'{(avgPT1[0],avgPT1[1],avgPT2[0], avgPT2[1])} <- bounds of screenshot')
 		image1.save(name)
 		return True
 
@@ -86,7 +84,7 @@ class Bot():
 				color = image.getpixel((x, y))
 				if color == targ_color:
 					targs.append((x,y))
-		print(target, f': found {len(targs)} targets')
+		print(f'{target}: <found {len(targs)} targets>')
 		if len(targs) == 0:
 			return None
 		x_boundaries = {"min":min(targs), "max":max(targs)}
@@ -103,12 +101,12 @@ class Bot():
 				click_pos = (int((x_boundaries["min"][0] + x_boundaries["max"][0])/2), int((y_boundaries["min"][0] + y_boundaries["max"][0])/2)) #x,y
 				return click_pos
 			else:
-				print(f'{actual_text} != {expected_text}')
+				print(f'Actual != Expected -> {actual_text} != {expected_text}')
 		else:
 			print(f'Boundary error | {x_boundaries}, {y_boundaries}\n{targs}')
 		return None
 
-	def auto_bestbuy(self):
+	def auto_bestbuy(self, url):
 		# Add to cart
 		i = 0
 		target = "yellow_add_to_cart"
@@ -125,7 +123,7 @@ class Bot():
 		else:
 			print("Error at add to cart")
 			return False
-		print("add to cart:",atc_click_pos)
+		print("ATC Click Position:",atc_click_pos)
 		time.sleep(1.5)
 		# Go to cart
 		i = 0
@@ -141,7 +139,7 @@ class Bot():
 		else:
 			print("Error at go to cart")
 			return False
-		print("go to cart:",gtc_click_pos)
+		print("GTC Click Position:",gtc_click_pos)
 		time.sleep(3) # Possibile sign up click at bottom of screen before load
 		# Checkout
 		i = 0
@@ -157,17 +155,20 @@ class Bot():
 		else:
 			print("Error at checkout")
 			return False
-		print("checkout:",ch_click_pos)
+		print("Checkout Click Position:",ch_click_pos)
 		time.sleep(2.5)
 		# Continue as Guest
 		self.doAction("click",[(1245,386),None])
 		time.sleep(1.5)
 
-	def run(self, action_to_take):
-		self.openSite(action_to_take)
-		time.sleep(2) # Wait for site load
-		pyautogui.moveTo(1000,500,duration=0)
-		return eval(f'self.auto_{action_to_take}')()
+	def run(self, vendor, actions_to_take):
+		results = []
+		for action in actions_to_take:
+			self.openSite(action)
+			time.sleep(2) # Wait for site load
+			pyautogui.moveTo(1000,500,duration=0)
+			results.append(eval(f'self.auto_{vendor}')(action))
+		return results
 
 def stringLikeness(s1, s2):
 	L = [[0 for j in range(len(s2))] for i in range(len(s1))]

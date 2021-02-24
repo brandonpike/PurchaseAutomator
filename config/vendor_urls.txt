@@ -1,0 +1,6 @@
+generic:
+	https://www.nowinstock.net/videogaming/consoles/sonyps5/
+bestbuy:
+	https://www.bestbuy.com/site/whirlpool-24-6-cu-ft-side-by-side-refrigerator-stainless-steel/5991300.p?skuId=5991300
+psdirect:
+	https://direct.playstation.com/en-us/consoles/console/playstation5-digital-edition-console.3005817

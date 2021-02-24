@@ -36,8 +36,32 @@ class Stock():
 
 class VendorHub():
 	def __init__(self):
-		self.URLS = {
+		self.URLS = self.getVendorURLS()
+		print(self.URLS)
+		self.this =	{
 					"generic":"https://www.nowinstock.net/videogaming/consoles/sonyps5/",
 					"bestbuy":"https://www.bestbuy.com/site/whirlpool-24-6-cu-ft-side-by-side-refrigerator-stainless-steel/5991300.p?skuId=5991300",#"https://www.bestbuy.com/site/sony-playstation-5-digital-edition-console/6430161.p?skuId=6430161",
 					"psdirect":"https://direct.playstation.com/en-us/consoles/console/playstation5-digital-edition-console.3005817"
 					}
+	def getVendorURLS(self):
+		urls = {}
+		file_name = "config/vendor_urls.txt"
+		try:
+			file = open(file_name,'r')
+		except:
+			print(f'Error - file "{file_name}" does not exist')
+			return None
+		category = None
+		for line in file:
+			clean = line.replace("\n","")
+			if '\t' not in line:
+				category = clean.replace(":","")
+			else:
+				clean = clean.replace("\t","")
+				split = clean.split(',')
+				if len(split) > 1:
+					clean = split
+				else:
+					clean = [clean]
+				urls[category] = clean
+		return urls

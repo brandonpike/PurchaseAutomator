@@ -28,8 +28,8 @@ def main(args):
 		actions_required = parser.parse()
 		print(f'Actions required -> {actions_required}')
 
-		for action in actions_required:
-			result = bot.run(action)
+		for vendor in actions_required:
+			result = bot.run(vendor, actions_required[vendor])
 			print(result)
 
 		time.sleep(30) # Ping sites every 30 seconds

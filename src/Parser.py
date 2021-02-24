@@ -22,8 +22,12 @@ class Parser():
 
 	def readLogin(self):
 		login = []
-		file_name = "login.txt"
-		file = open(file_name,'r')
+		file_name = "config/login.txt"
+		try:
+			file = open(file_name,'r')
+		except:
+			print(f'Error - file "{file_name}" does not exist')
+			return None,None
 		for line in file:
 			clean = line.replace("\n","")
 			login.append(clean)
@@ -31,8 +35,12 @@ class Parser():
 
 	def readContactList(self):
 		contacts = {}
-		file_name = "contacts.txt"
-		file = open(file_name,'r')
+		file_name = "config/contacts.txt"
+		try:
+			file = open(file_name,'r')
+		except:
+			print(f'Error - file "{file_name}" does not exist')
+			return None
 		category = None
 		for line in file:
 			clean = line.replace("\n","")
@@ -72,7 +80,6 @@ class Parser():
 		print('---------------------------------------------------------------------')
 
 	def sendAnnouncement(self, announcement):
-
 		print(announcement.getMessage())
 		
 		smtp = "smtp.gmail.com" 
@@ -97,21 +104,25 @@ class Parser():
 		server.quit()
 
 	def parse(self): # returns actions required (boolean)
-		actions_required = []
-		things_to_parse = ([self.mode] if self.mode != "all_vendors" else [v for v in self.VH.URLS if v != "generic"])
-		for t in things_to_parse:
-			action = eval(f'self.parse_{t}')() # type(action) = str -> mode ("bestbuy", "psdirect", etc...)
-			if action == True:
-				actions_required.append(t)
-			elif t == "generic":
-				self.update(action)
+		actions_required = {}
+		vendors_to_parse = ([self.mode] if self.mode != "all_vendors" else [v for v in self.VH.URLS if v != "generic"])
+		for v in vendors_to_parse:
+			actions = eval(f'self.parse_{v}')(self.VH.URLS[v]) # type(action) = str -> mode ("bestbuy", "psdirect", etc...)
+			if v == "generic":
+				self.update(actions)
+			else:
+				if len(actions) > 0:
+					if v in actions_required:
+						actions_required[v] += actions
+					else:
+						actions_required[v] = actions
 		return actions_required
 
-	def parse_generic(self):
+	def parse_generic(self, urls):
 		newData = {}
-		for site in self.VH.URLS:
+		for url in urls:
 			stocks = [] 
-			page = requests.get(self.VH.URLS[site])
+			page = requests.get(url)
 			soup = BeautifulSoup(page.content, "html.parser")
 			data_container = soup.find(id="data")
 			table = data_container.table
@@ -133,20 +144,24 @@ class Parser():
 					st.update(i,value)
 				if st.valid == True and "Ebay" not in st.name and st.name != "" and "Console :" not in st.name and "Bundle:" not in st.name:
 					stocks.append(st)
-			newData[site] = stocks
+			newData[url] = stocks
 		return newData
 
-	def parse_bestbuy(self):
-		url = self.VH.URLS["bestbuy"]
-		page = requests.get(url, headers=self.headers)
-		soup = BeautifulSoup(page.text, 'html.parser')
-		button = soup.find(class_='fulfillment-add-to-cart-button')
-		btext = button.findChild().findChild().findChild().text
-		return (False if btext == "Sold Out" else True)
+	def parse_bestbuy(self, urls):
+		actions = []
+		for url in urls:
+			page = requests.get(url, headers=self.headers)
+			soup = BeautifulSoup(page.text, 'html.parser')
+			button = soup.find(class_='fulfillment-add-to-cart-button')
+			btext = button.findChild().findChild().findChild().text
+			actions.append(url) if btext != "Sold Out" else None
+		return actions
 
-	def parse_psdirect(self):
-		btext = "Out of Stock"
-		url = self.VH.URLS["psdirect"]
-		page = requests.get(url, headers=self.headers)
-		soup = BeautifulSoup(page.text, 'html.parser')
-		return False#(False if btext != "Out of Stock" else True)
+	def parse_psdirect(self, urls):
+		actions = []
+		for url in urls:
+			btext = "Out of Stock"
+			page = requests.get(url, headers=self.headers)
+			soup = BeautifulSoup(page.text, 'html.parser')
+			actions.append(url) if btext != "Out of Stock" else None
+		return actions#(False if btext != "Out of Stock" else True)

@@ -1,3 +1,5 @@
-login.txt
+config/login.txt
+config/contacts.txt
 __pycache__/
 tmp/
+psdirect_queue_page.png
